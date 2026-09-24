@@ -2,7 +2,7 @@ import shlex
 
 import prompt
 
-from primitive_db.core import create_table, drop_table
+from primitive_db.core import create_table, drop_table, list_tables
 from primitive_db.utils import load_metadata, save_metadata
 
 DB_FILE = "db_meta.json"
@@ -28,6 +28,10 @@ def run():
                 print(f'Таблица "{table_name}" создана.')
             except ValueError as error:
                 print(error)
+
+        elif command == "list_tables":
+            tables = list_tables(metadata)
+            print(tables)
 
         elif command == "drop_table":
             table_name = args[1]

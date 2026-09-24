@@ -95,3 +95,7 @@ drop_table users
 ```text
 Таблица "users" удалена.
 ```
+
+## Демонстрация работы
+
+[![asciicast](https://asciinema.org/a/s3VP1TinRdDLmLCw.svg)](https://asciinema.org/a/s3VP1TinRdDLmLCw)
