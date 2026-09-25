@@ -99,3 +99,17 @@ drop_table users
 ## Демонстрация работы
 
 [![asciicast](https://asciinema.org/a/s3VP1TinRdDLmLCw.svg)](https://asciinema.org/a/s3VP1TinRdDLmLCw)
+
+## CRUD-операции
+
+Программа поддерживает операции добавления, чтения, изменения и удаления данных в таблицах.
+
+### Добавление записи
+
+```text
+insert into <имя_таблицы> values (<значение1>, <значение2>, ...)
+
+### Демонстрация CRUD-операций
+
+[![asciicast](https://asciinema.org/a/1E1sy3NUxA7ejRmD.svg)](https://asciinema.org/a/1E1sy3NUxA7ejRmD)
+
