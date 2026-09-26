@@ -1,6 +1,23 @@
+from primitive_db.decorators import confirm_action, handle_db_errors, log_time
 from primitive_db.utils import load_table_data, save_table_data
 
 
+def create_cacher():
+    cache = {}
+
+    def cache_result(key, value_func):
+        if key not in cache:
+            cache[key] = value_func()
+
+        return cache[key]
+
+    return cache_result
+
+
+select_cache = create_cacher()
+
+
+@handle_db_errors
 def create_table(metadata, table_name, columns):
     if table_name in metadata:
         raise ValueError(f'Таблица "{table_name}" уже существует.')
@@ -18,6 +35,8 @@ def create_table(metadata, table_name, columns):
 
     return metadata
 
+@handle_db_errors
+@confirm_action("Удаление таблицы")
 def drop_table(metadata, table_name):
     if table_name not in metadata:
         raise ValueError(f'Таблица "{table_name}" не существует.')
@@ -30,6 +49,8 @@ def list_tables(metadata):
     return list(metadata.keys())
 
 
+@handle_db_errors
+@log_time
 def insert(metadata, table_name, values):
     if table_name not in metadata:
         raise ValueError(f'Таблица "{table_name}" не существует.')
@@ -67,19 +88,37 @@ def insert(metadata, table_name, values):
     return table_data
 
 
+@handle_db_errors
+@log_time
 def select(table_data, where_clause=None):
-    if where_clause is None:
-        return table_data
+    rows_key = tuple(
+        tuple(sorted(row.items()))
+        for row in table_data
+    )
+    where_key = (
+        tuple(sorted(where_clause.items()))
+        if where_clause is not None
+        else None
+    )
+    key = (rows_key, where_key)
 
-    result = []
+    def get_result():
+        if where_clause is None:
+            return [row.copy() for row in table_data]
 
-    for row in table_data:
-        if all(row.get(key) == value for key, value in where_clause.items()):
-            result.append(row)
+        return [
+            row.copy()
+            for row in table_data
+            if all(
+                row.get(key) == value
+                for key, value in where_clause.items()
+            )
+        ]
 
-    return result
+    return select_cache(key, get_result)
 
 
+@handle_db_errors
 def update(table_data, set_clause, where_clause):
     for row in table_data:
         if all(row.get(key) == value for key, value in where_clause.items()):
@@ -88,7 +127,8 @@ def update(table_data, set_clause, where_clause):
 
     return table_data
 
-
+@handle_db_errors
+@confirm_action("Удаление таблицы")
 def delete(table_data, where_clause):
     result = []
 

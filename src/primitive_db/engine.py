@@ -37,12 +37,13 @@ def run():
         elif command == "create_table":
             table_name = args[1]
             columns = args[2:]
-            try:
-                metadata = create_table(metadata, table_name, columns)
+
+            result = create_table(metadata, table_name, columns)
+
+            if result is not None:
+                metadata = result
                 save_metadata(DB_FILE, metadata)
                 print(f'Таблица "{table_name}" создана.')
-            except ValueError as error:
-                print(error)
 
         elif command == "insert":
             table_name = args[2]
@@ -57,14 +58,13 @@ def run():
                 for value in values_string.split(",")
             ]
 
-            try:
-                table_data = insert(metadata, table_name, values)
+            table_data = insert(metadata, table_name, values)
+
+            if table_data is not None:
                 print(
                     f'Запись с ID={table_data[-1]["ID"]} успешно добавлена '
                     f'в таблицу "{table_name}".'
                 )
-            except ValueError as error:
-                print(error)
 
         elif command == "select":
             table_name = args[2]
@@ -118,9 +118,9 @@ def run():
             where_clause = parse_where(where_condition)
 
             table_data = delete(table_data, where_clause)
-            save_table_data(table_name, table_data)
-
-            print(f'Данные из таблицы "{table_name}" удалены.')
+            if table_data is not None:
+                save_table_data(table_name, table_data)
+                print(f'Данные из таблицы "{table_name}" удалены.')
 
         elif command == "list_tables":
             tables = list_tables(metadata)
@@ -128,12 +128,13 @@ def run():
 
         elif command == "drop_table":
             table_name = args[1]
-            try:
-                metadata = drop_table(metadata, table_name)
+
+            result = drop_table(metadata, table_name)
+
+            if result is not None:
+                metadata = result
                 save_metadata(DB_FILE, metadata)
                 print(f'Таблица "{table_name}" удалена.')
-            except ValueError as error:
-                print(error)
 
         elif command == "help":
             print("\n***Процесс работы с таблицами***")
